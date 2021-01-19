@@ -1,0 +1,63 @@
+#include "user.h"
+#include "film.h"
+#include "loc.h"
+#include "bilet.h"
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <vector>
+#include <iomanip>
+#include <algorithm>
+using namespace std;
+
+
+static void MenuPrincipal()
+{
+    int choice;
+    do {
+        cout << "Alegeti o optiune: " << endl << "1-> Client" << endl << "2-> Film" << endl << "3-> Loc" << endl << "4-> Bilet" << endl << "9-> Iesire" << endl;
+        cout << "Optiune: ";
+        cin >> choice;
+        switch (choice) {
+        case 1: {
+            cout << "CrudMenuClient" << endl;
+            Client::CRUDMenuClient();
+        }
+              break;
+        case 2: {
+            cout << "CrudMenuFilm" << endl;
+            Film::CRUDMenuFilm();
+        }
+              break;
+        case 3: {
+            cout << "CrudMenuLoc" << endl;
+            Loc::CRUDMenuLoc();
+        }
+              break;
+        case 4: {
+            cout << "CrudMenuBilet" << endl;
+            Bilet::CRUDMenuBilet();
+        }
+        case 9:
+            break;
+        default:
+            cout << "Optiune invalida!" << endl;
+            break;
+        }
+    } while (choice != 9);
+}
+
+int main()
+{
+    MenuPrincipal();
+
+    //emitere bilet txt
+    float pret[] = { 22.5f };
+    Bilet b1("Necunoscut", 2, 2, "Sala 1");
+    b1.setPret(pret, 1);
+    cout << "Emitere bilet: ";
+    ofstream of;
+    of.open("bilet.txt");
+    of << b1;
+    of.close();
+}
