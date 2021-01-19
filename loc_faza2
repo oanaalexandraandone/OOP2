@@ -1,0 +1,503 @@
+#pragma once
+#define LOC_H
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <iomanip>
+#include <vector>
+using namespace std;
+
+class Loc {
+
+private:
+    static int idLoc;
+    string sala;
+    int rand;
+    int loc;
+    const char ocupat = '1';
+    const char neocupat = '0';
+    char map[100][100];
+    int Inchide = 1;
+    const int idCurent = 0;
+
+public:
+
+    Loc() : idCurent(++idLoc)
+    {
+        this->sala = sala;
+        this->rand = rand;
+        this->loc = loc;
+        for (int i = 0; i < rand; i++)
+        {
+            for (int j = 0; j < loc; j++)
+                map[i][j] = neocupat;
+        }
+    }
+
+    Loc(string sala, int rand, int loc) : idCurent(++idLoc)
+    {
+        this->sala = sala;
+        this->rand = rand;
+        this->loc = loc;
+        for (int i = 0; i < rand; i++)
+        {
+            for (int j = 0; j < loc; j++)
+                map[i][j] = neocupat;
+        }
+    }
+
+    ~Loc() {}
+
+    Loc& operator=(const Loc& l)
+    {
+        sala = l.sala;
+        rand = l.rand;
+        loc = l.loc;
+        return *this;
+    }
+
+    void setLoc(int rand, int loc) {
+        if (rand > 0 && loc > 0) {
+            this->rand = rand;
+            this->loc = loc;
+        }
+        else {
+            cout << "Loc inexistent!" << endl;
+        }
+    }
+
+    void setSala(string sala)
+    {
+        if (sala != " ")
+        {
+            this->sala = sala;
+        }
+        else
+        {
+            cout << "Sala inexistenta!" << endl;
+        }
+    }
+
+    string getSala()
+    {
+        return sala;
+    }
+
+    int getRand()
+    {
+        return rand;
+    }
+
+    int getLoc()
+    {
+        return loc;
+    }
+
+    int getId()
+    {
+        return this->idCurent;
+    }
+
+    Loc operator+(int loc)
+    {
+        if (loc < 0)
+        {
+            throw 500;
+        }
+        Loc copie = *this;
+        copie.loc += loc;
+        return copie;
+    }
+
+    Loc operator++()
+    {
+        this->rand++;
+        return *this;
+    }
+    explicit operator int() const
+    {
+        return 0;
+    }
+
+    bool operator!()
+    {
+        return sala != "";
+    }
+
+    bool operator == (Loc& l) {
+        return (this->sala == l.sala);
+    }
+
+    friend bool operator<(const Loc& l, const Loc& r)
+    {
+        return (l.sala, l.rand, l.loc) < (r.sala, r.rand, r.loc);
+    }
+
+    void afisare()
+    {
+        cout << "ID: " << getId() << endl;
+        cout << "Sala: " << sala << endl;
+        cout << "Rand: " << rand << endl;
+        cout << "Loc: " << loc << endl;
+    }
+
+    Loc updateLoc() {
+        int choice = 0;
+        cout << "Ce atribut doriti sa actualizati?" << endl;
+        cout << "1 - sala // 2- rand si loc // 9 - inchide meniu" << endl;
+        cout << "Optiune: ";
+
+
+        do {
+            cin >> choice;
+
+            switch (choice) {
+            case 1: {
+
+                string newSala = " ";
+                cout << "Introduceti noua sala: " << endl;
+                cin >> newSala;
+                if (newSala != " ") {
+                    this->setSala(newSala);
+                }
+                this->afisare();
+            }break;
+            case 2: {
+                int newRand = 0;
+                int newLoc = 0;
+                cout << "Introduceti noul rand: " << endl;
+                cin >> newRand;
+                cout << "Introduceti noul loc: " << endl;
+                cin >> newLoc;
+                this->setLoc(newRand, newLoc);
+                this->afisare();
+            }break;
+
+            case 9:
+                cout << "La revedere!" << endl;
+                break;
+
+            default:
+                cout << "Optiune invalida!" << endl;
+                break;
+            }
+        } while (choice != 9);
+        return *this;
+    }
+
+    static Loc updateLoc(int id, vector<Loc> vector) {
+        int choice = 0;
+        Loc temp;
+        for (int i = 0; i < vector.size(); i++) {
+            if (vector[i].getId() == id)
+            {
+                temp = vector[i];
+                break;
+            }
+        }
+        cout << "Ce atribut doriti sa actualizati?" << endl;
+        cout << "1 - Sala // 2 - Rand si loc // 9 - Inchide" << endl;
+        do {
+            cout << "Optiune: " << endl;
+            cin >> choice;
+
+            switch (choice) {
+            case 1: {
+
+                string newSala = " ";
+                cout << "Introduceti noua sala: " << endl;
+                cin >> newSala;
+                if (newSala != " ") {
+                    temp.setSala(newSala);
+                }
+                temp.afisare();
+            }break;
+            case 2: {
+                int newRand = 0;
+                int newLoc = 0;
+                cout << "Introduceti noul rand: " << endl;
+                cin >> newRand;
+                cout << "Introduceti noul loc: " << endl;
+                cin >> newLoc;
+                temp.setLoc(newRand, newLoc);
+                temp.afisare();
+            }break;
+
+            case 9:
+                cout << "La revedere!" << endl;
+                break;
+
+            default:
+                cout << "Optiune invalida!" << endl;
+                break;
+            }
+        } while (choice != 9);
+        return temp;
+    }
+
+    static void saveInFile(const Loc& l, const char* fileName) {
+        fstream file;
+        file.open(fileName, ios::out | ios::binary);
+        if (!file) {
+            cout << "Eroare!" << endl;;
+        }
+        file.write((char*)&l, sizeof(l));
+        file.close();
+    }
+
+    static void saveInFile(vector<Loc>& l) {
+        fstream file;
+        file.open("locuri.bin", ios::out | ios::binary);
+        if (!file) {
+            cout << "Eroare" << endl;;
+        }
+        for (int i = 0; i < l.size(); i++) {
+            file.write((char*)&l[i], sizeof(Loc));
+        }
+        file.close();
+        cout << "Date scrise cu succes!" << endl;
+    }
+
+    static void readFromFile() {
+        Loc temp;
+        vector<Loc> vector;
+        ifstream ifs("locuri.bin", ios::binary);
+        if (!ifs) {
+            cout << "Eroare!" << endl;
+        }
+        while (ifs.read((char*)&temp, sizeof(temp))) {
+            vector.push_back(Loc(temp));
+            cout << endl << endl;
+            cout << "Date extrase!" << endl;
+            cout << temp;
+            temp.afisare();
+        }
+        ifs.close();
+    }
+
+    static void readFromFile(const char* fileName) {
+        ifstream l;
+        l.open(fileName);
+        Loc loc;
+        if (l.read((char*)&loc, sizeof(loc))) {
+            cout << endl;
+            cout << "Date extrase!" << endl;
+            cout << loc;
+        }
+        else {
+            cout << "Eroare!" << endl;
+        }
+        l.close();
+    }
+
+    static void deleteFromFile(int idLoc) {
+        cout << "Stergere..." << endl;
+        Loc locTemp;
+        vector<Loc> vector;
+        ifstream ifs("locuri.bin", ios::out | ios::binary);
+        ofstream fout("temp.bin", ios::out | ios::binary);
+        if (!ifs) {
+            cout << "Eroare!" << endl;
+        }
+        while (ifs.read((char*)&locTemp, sizeof(locTemp))) {
+            vector.push_back(Loc(locTemp));
+            cout << endl << endl;
+            for (int i = 0; i < vector.size(); i++) {
+                if (vector[i].idLoc != idLoc) {
+                    fout.write((char*)&vector[i], sizeof(Loc));
+                }
+            }
+        }
+        fout.close();
+        ifs.close();
+        remove("locuri.bin");
+        rename("temp.bin", "locuri.bin");
+    }
+
+    static Loc createLoc() {
+        Loc l;
+        cout << "ID:" << endl;
+        cin >> l.idLoc;
+        cout << "Sala: " << endl;
+        cin >> l.sala;
+        cout << "Rand: " << endl;
+        cin >> l.rand;
+        cout << "Loc: " << endl;
+        cin >> l.loc;
+        return l;
+    }
+
+    static void CRUDMenuLoc() {
+        int choice;
+        vector<Loc> vector;
+        do {
+            cout << "Alegeti o optiune: 1-> Create; 2-> Read ; 3-> Update; 4-> Delete ; 9-> EXIT" << endl;
+            cin >> choice;
+            switch (choice) {
+            case 1: {
+                cout << "Cate locuri doriti sa creati?" << endl;
+                int number;
+                Loc temp;
+                cout << "Optiune: ";
+                cin >> number;
+                for (int i = 0; i < number; i++) {
+                    cout << endl;
+                    temp = createLoc();
+                    cout << "Locul cu ID-ul " << i + 1 << " a fost creat" << endl;
+                    vector.push_back(temp);
+                }
+                saveInFile(vector);
+                break;
+            }
+            case 2:
+                readFromFile();
+                break;
+            case 3: {
+                cout << "Introduceti ID-ul locului pe care doriti sa il actualizati: \n";
+                int id;
+                cin >> id;
+                updateLoc(id, vector);
+                break;
+            }
+            case 4:
+                int id;
+                cout << "Introduceti ID-ul locului pe care doriti sa il stergeti: ";
+                cin >> id;
+                deleteFromFile(id);
+
+            case 9:
+                break;
+
+            default:
+                cout << "Optiune invalida!" << endl;
+                break;
+            }
+
+        } while (choice != 9);
+
+    }
+
+    int menuLocuri();
+    void arataSchemaSala();
+    void rezervaLoc();
+
+    friend ostream& operator<<(ostream&, Loc&);
+    friend istream& operator>>(istream&, Loc&);
+    friend ofstream& operator << (ofstream&, Loc&);
+    friend ifstream& operator>>(ifstream&, Loc&);
+
+};
+
+int Loc::idLoc = 0;
+
+void Loc::rezervaLoc() {
+    int choice = 0, i, j;
+    do
+    {
+        choice = menuLocuri();
+        switch (choice)
+        {
+        case 1:
+            arataSchemaSala();
+            do
+            {
+                cout << "Va rugam selectati randul: ";
+                cin >> i;
+                cout << "Va rugam selectati locul: ";
+                cin >> j;
+
+                if (map[i][j] == '1')
+                {
+                    cout << "Ne pare rau, locul este deja ocupat!";
+                    cout << endl;
+                }
+                else
+                {
+                    cout << "Locul dumneavoastra a fost rezervat" << endl;
+                    map[i][j] = ocupat;
+                    arataSchemaSala();
+                    cout << "Doriti sa rezervati un alt loc ? ?(1 = DA / 2 = NU)";
+                    cin >> Inchide;
+                }
+
+            } while (Inchide == 1);
+
+            break;
+
+        case 2:
+            cout << "Verifica locuri sala" << endl;
+            arataSchemaSala();
+            break;
+        default: cout << "Eroare" << endl;
+        }
+
+    } while (choice != 3);
+
+}
+
+int Loc::menuLocuri()
+{
+    int choice;
+    cout << endl << endl;
+    cout << " 1. Rezerva Loc" << endl;
+    cout << " 2. Verfica Loc" << endl;
+    cout << "Introduceti o optiune: ";
+    cin >> choice;
+    cout << endl << endl;
+    return choice;
+}
+
+void Loc::arataSchemaSala()
+{
+    for (int i = 0; i < 9; i++)
+    {
+        cout << endl << "Randul: " << (i + 1);
+        for (int j = 0; j < 9; j++)
+        {
+            cout << " " << map[i][j];
+        }
+    }
+    cout << endl;
+}
+
+ostream& operator<<(ostream& out, Loc& l)
+{
+    out << l.sala << "\t" << l.rand << "\t" << l.loc;
+    return out;
+}
+
+istream& operator>>(istream& in, Loc& l)
+{
+    cout << "Sala: ";
+    in >> l.sala;
+    cout << "Rand: ";
+    in >> l.rand;
+    cout << "Loc: ";
+    in >> l.loc;
+    return in;
+}
+
+ofstream& operator << (ofstream& of, Loc& l)
+{
+    if (of.is_open())
+    {
+        of << "ID: " << l.idLoc << endl;
+        of << "Sala: " << l.sala << endl;
+        of << "Rand: " << l.rand << endl;
+        of << "Loc: " << l.loc << endl;
+        return of;
+    }
+}
+
+ifstream& operator>>(ifstream& is, Loc& l)
+{
+    cout << "ID: ";
+    is >> l.idLoc;
+    cout << "Sala: ";
+    is >> l.sala;
+    cout << "Rand:" << endl;
+    is >> l.rand;
+    cout << "Loc:" << endl;
+    is >> l.loc;
+    return is;
+}
