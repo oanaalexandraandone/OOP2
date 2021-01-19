@@ -1,0 +1,693 @@
+#pragma once
+#define FILM_H
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class Film
+{
+private:
+    static int idUnicf;
+    char* nume = nullptr;
+    string gen = "";
+    int* ore;
+    int nrDifuzari;
+    int anulLansarii;
+    const int idCurentf = 0;
+
+public:
+    Film() :idCurentf(++idUnicf)
+    {
+        this->nume = new char[strlen("Film nedefinit") + 1];
+        strcpy_s(this->nume, strlen("Film nedefinit") + 1, "Film nedefinit");
+        gen = "";
+        anulLansarii = 0000;
+        ore = nullptr;
+        nrDifuzari = 0;
+    }
+
+    Film(char* nume, string gen, int anulLansarii, int* ore, int nrDifuzari) :idCurentf(++idUnicf)
+    {
+        this->nume = new char[strlen(nume) + 1];
+        strcpy_s(this->nume, strlen(nume) + 1, nume);
+        this->gen = gen;
+        this->anulLansarii = anulLansarii;
+        if (ore != nullptr && nrDifuzari > 0)
+        {
+            this->ore = new int[nrDifuzari];
+            for (int i = 0; i < nrDifuzari; i++)
+            {
+                this->ore[i] = ore[i];
+            }
+            this->nrDifuzari = nrDifuzari;
+        }
+        else
+        {
+            this->ore = nullptr;
+            this->nrDifuzari = 0;
+        }
+    }
+
+    ~Film()
+    {
+        if (nume != nullptr)
+        {
+            delete[] nume;
+        }
+        if (ore != nullptr)
+        {
+            delete[] ore;
+        }
+    }
+
+    Film(const Film& f) :idCurentf(++f.idUnicf)
+    {
+        if (f.nume != nullptr)
+        {
+            this->nume = new char[strlen(f.nume) + 1];
+            strcpy_s(this->nume, strlen(f.nume) + 1, f.nume);
+        }
+        else
+        {
+            this->nume = nullptr;
+        }
+        this->gen = f.gen;
+        this->anulLansarii = f.anulLansarii;
+        if (f.ore != nullptr && f.nrDifuzari > 0)
+        {
+            nrDifuzari = f.nrDifuzari;
+            ore = new int[f.nrDifuzari];
+            for (int i = 0; i < f.nrDifuzari; i++)
+            {
+                ore[i] = f.ore[i];
+            }
+        }
+        else
+        {
+            ore = nullptr;
+            nrDifuzari = 0;
+        }
+    }
+
+    Film& operator=(Film f)
+    {
+        if (nume != nullptr)
+        {
+            delete[] nume;
+        }
+        if (f.nume != nullptr)
+        {
+            this->nume = new char[strlen(f.nume) + 1];
+            strcpy_s(this->nume, strlen(f.nume) + 1, f.nume);
+        }
+        else
+        {
+            this->nume = nullptr;
+        }
+        this->gen = f.gen;
+        this->anulLansarii = f.anulLansarii;
+        if (f.ore != nullptr && f.nrDifuzari > 0)
+        {
+            nrDifuzari = f.nrDifuzari;
+            ore = new int[f.nrDifuzari];
+            for (int i = 0; i < f.nrDifuzari; i++)
+            {
+                ore[i] = f.ore[i];
+            }
+        }
+        else
+        {
+            ore = nullptr;
+            nrDifuzari = 0;
+        }
+
+        return *this;
+    }
+    //setter
+    void setNume(char* nume)
+    {
+        delete[] this->nume;
+        this->nume = new char[strlen(nume) + 1];
+        strcpy_s(this->nume, strlen(nume) + 1, nume);
+    }
+
+    void setanulLansarii(int noulAn)
+    {
+        if (noulAn < 1900)
+            cout << ("Introduceti anul lansarii: ");
+        if (noulAn > 1900 && noulAn < 2021)
+        {
+            this->anulLansarii = noulAn;
+        }
+    }
+    void setGen(string gen)
+    {
+        if (gen != " ")
+        {
+            this->gen = gen;
+        }
+        else
+        {
+            cout << "Gen film invalid!" << endl;
+        }
+    }
+    void setOre(int* ore, int nrDifuzari)
+    {
+        if (this->ore != nullptr)
+        {
+            delete[] this->ore;
+        }
+        if (ore != nullptr && nrDifuzari > 0)
+        {
+            this->nrDifuzari = nrDifuzari;
+            this->ore = new int[nrDifuzari];
+            for (int i = 0; i < nrDifuzari; i++)
+            {
+                this->ore[i] = ore[i];
+            }
+        }
+        else
+        {
+            this->ore = nullptr;
+            this->nrDifuzari = 0;
+        }
+    }
+
+    int getidUnicf()
+    {
+        return idUnicf;
+    }
+    char* getNume()
+    {
+        return nume;
+    }
+    string getGen()
+    {
+        return this->gen;
+    }
+
+    char getanulLansarii()
+    {
+        return anulLansarii;
+    }
+
+    int* getOre()
+    {
+        if (ore != nullptr)
+        {
+            int* copie = new int[nrDifuzari];
+            for (int i = 0; i < nrDifuzari; i++)
+            {
+                copie[i] = ore[i];
+            }
+            return copie;
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+
+    int getnrDifuzari()
+    {
+        return nrDifuzari;
+    }
+
+    bool operator!()
+    {
+        return nrDifuzari > 0;
+    }
+    Film operator++()
+    {
+        this->anulLansarii++;
+        return *this;
+    }
+
+    Film operator++(int i)
+    {
+        Film copie = *this;
+        this->anulLansarii++;
+        return copie;
+    }
+
+    Film operator+(int nrAni)
+    {
+        Film copie = *this;
+        copie.anulLansarii += nrAni;
+        return copie;
+    }
+
+    explicit operator int()
+    {
+        return anulLansarii;
+    }
+    void serializare()
+    {
+        ofstream f("film.bin", ios::binary);
+        f.write((char*)&idUnicf, sizeof(idUnicf));
+        f.write(nume, (long long)strlen(nume) + 1);
+        int length = gen.length() + 1;
+        f.write((char*)&length, sizeof(length));
+        f.write(gen.c_str(), length);
+        f.write((char*)&anulLansarii, sizeof(anulLansarii));
+        f.write((char*)&nrDifuzari, sizeof(nrDifuzari));
+        for (int i = 0; i < nrDifuzari; i++)
+        {
+            f.write((char*)&ore[i], sizeof(ore[i]));
+        }
+        f.close();
+    }
+    void deserializare()
+    {
+        ifstream f("film.bin", ios::binary);
+        f.read((char*)&idUnicf, sizeof(idUnicf));
+        string buffer = "";
+        char c = 0;
+        while ((c = f.get()) != 0)
+        {
+            buffer += c;
+        }
+        delete[] nume;
+        nume = new char[buffer.length() + 1];
+        strcpy_s(nume, buffer.length() + 1, buffer.c_str());
+        int length = 0;
+        f.read((char*)&length, sizeof(length));
+        char* aux = new char[length];
+        f.read(aux, length);
+        gen = aux;
+        f.read((char*)&anulLansarii, sizeof(anulLansarii));
+        f.read((char*)&nrDifuzari, sizeof(nrDifuzari));
+        delete[] ore;
+        ore = new int[nrDifuzari];
+        for (int i = 0; i < nrDifuzari; i++)
+        {
+            f.read((char*)&ore[i], sizeof(ore[i]));
+        }
+        f.close();
+    }
+
+    void afiseazaFilm()
+    {
+        cout << "ID film : " << idUnicf << endl;
+        cout << "Nume film: " << nume << endl;
+        cout << "Genul filmului: " << gen << endl;
+        cout << "Anul lansarii: " << anulLansarii << endl;
+        cout << "Numar difuzari: " << nrDifuzari << endl;
+        cout << "Filmul se va difuza la orele: ";
+        if (ore != nullptr)
+        {
+            for (int i = 0; i < nrDifuzari; i++)
+            {
+                cout << ore[i] << ", ";
+            }
+        }
+        cout << endl;
+    }
+
+    Film updateFilm() {
+        int choice = 0;
+        cout << "Ce atribut doriti sa actualizati?" << endl;
+        cout << "1 - Nume // 2 - Anul lansarii // 3 - Gen // 9 - Inchide" << endl;
+        cout << "Optiune: " << endl;
+
+        do {
+            cin >> choice;
+            switch (choice) {
+            case 1: {
+                char* newName = nullptr;
+                cout << "Introduceti noul nume: " << endl;
+                cin >> newName;
+                if (newName != nullptr)
+                {
+                    this->setNume(newName);
+                }
+                this->afiseazaFilm();
+            }break;
+            case 2: {
+                int newAnulLansarii = 0;
+                cout << "Introduceti noul an: " << endl;
+                cin >> newAnulLansarii;
+                this->setanulLansarii(newAnulLansarii);
+                this->afiseazaFilm();
+            }break;
+            case 3: {
+                string newGen = " ";
+                cout << "Introduceti noul gen: " << endl;
+                cin >> newGen;
+                if (newGen != " ") {
+                    this->setGen(newGen);
+                }
+                this->afiseazaFilm();
+            } break;
+
+            case 9:
+                cout << "La revedere!" << endl;
+                break;
+
+            default:
+                cout << "Optiune invalida!" << endl;
+                break;
+            }
+        } while (choice != 9);
+        return *this;
+    }
+
+    static Film updateFilm(int id, vector<Film> vector) {
+        int choice = 0;
+        Film temp;
+        for (int i = 0; i < vector.size(); i++) {
+            if (vector[i].getidUnicf() == id)
+            {
+                temp = vector[i];
+                break;
+            }
+        }
+        cout << "Ce atribut doriti sa actualizati?" << endl;
+        cout << "1 - Nume // 2- Anul lansarii // 3 - Gen // 9 - Inchide" << endl;
+        do {
+            cout << "Optiune: " << endl;
+            cin >> choice;
+            switch (choice) {
+            case 1: {
+                char* newName = nullptr;
+                cout << "Introduceti noul film: " << endl;
+                cin >> newName;
+                if (newName != " ") {
+                    temp.setNume(newName);
+                }
+                temp.afiseazaFilm();
+            }break;
+            case 2: {
+                int newAnulLansarii = 0;
+                cout << "Introduceti noul rand: " << endl;
+                cin >> newAnulLansarii;
+                temp.setanulLansarii(newAnulLansarii);
+                temp.afiseazaFilm();
+            }break;
+            case 3: {
+                string newGen = " ";
+                cout << "Introduceti noua sala: " << endl;
+                cin >> newGen;
+                if (newGen != " ") {
+                    temp.setGen(newGen);
+                }
+                temp.afiseazaFilm();
+            } break;
+
+            case 9:
+                cout << "La revedere!" << endl;
+                break;
+
+            default:
+                cout << "Optiune invalida!" << endl;
+                break;
+            }
+        } while (choice != 9);
+        return temp;
+    }
+
+    static void saveInFile(const Film& f, const char* fileName) {
+        fstream file;
+        file.open(fileName, ios::out | ios::binary);
+        if (!file) {
+            cout << "Eroare!" << endl;;
+        }
+        file.write((char*)&f, sizeof(f));
+        file.close();
+    }
+
+    static void saveInFile(vector<Film>& f) {
+        fstream file;
+        file.open("filme.bin", ios::out | ios::binary);
+        if (!file) {
+            cout << "Eroare" << endl;;
+        }
+        for (int i = 0; i < f.size(); i++) {
+            file.write((char*)&f[i], sizeof(Film));
+        }
+        file.close();
+        cout << "Date scrise cu succes!" << endl;
+    }
+
+    static void readFromFile() {
+        Film temp;
+        vector<Film> vector;
+        ifstream ifs("filme.bin", ios::binary);
+        if (!ifs) {
+            cout << "Eroare!" << endl;
+        }
+        while (ifs.read((char*)&temp, sizeof(temp))) {
+            vector.push_back(Film(temp));
+            cout << endl << endl;
+            cout << "Date extrase!" << endl;
+            cout << temp;
+        }
+        ifs.close();
+    }
+
+    static void readFromFile(const char* fileName) {
+        ifstream f;
+        f.open(fileName);
+        Film Film;
+        if (f.read((char*)&Film, sizeof(Film))) {
+            cout << endl;
+            cout << "Date extrase!" << endl;
+            cout << Film;
+        }
+        else {
+            cout << "Eroare!" << endl;
+        }
+        f.close();
+    }
+
+    static void deleteFromFile(int idUnic) {
+        cout << "Stergere" << endl;
+        Film FilmTemp;
+        vector<Film> vector;
+        ifstream ifs("filme.bin", ios::out | ios::binary);
+        ofstream fout("temp.bin", ios::out | ios::binary);
+        if (!ifs) {
+            cout << "Eroare!" << endl;
+        }
+        while (ifs.read((char*)&FilmTemp, sizeof(FilmTemp))) {
+            vector.push_back(Film(FilmTemp));
+            cout << endl << endl;
+            for (int i = 0; i < vector.size(); i++) {
+                if (vector[i].idUnicf != idUnic) {
+                    fout.write((char*)&vector[i], sizeof(Film));
+                }
+            }
+        }
+        fout.close();
+        ifs.close();
+        remove("filme.bin");
+        rename("temp.bin", "filme.bin");
+    }
+
+    static Film createFilm() {
+        Film f;
+        cout << "Nume film: ";
+        delete[] f.nume;
+        char buffer[100];
+        cin >> ws;
+        cin.getline(buffer, 99);
+        f.nume = new char[strlen(buffer) + 1];
+        strcpy_s(f.nume, strlen(buffer) + 1, buffer);
+        cout << "Genul filmului: ";
+        cin >> f.gen;
+        cout << "Anul lansarii: ";
+        cin >> f.anulLansarii;
+        cout << "Numar difuzari ";
+        cin >> f.nrDifuzari;
+        if (f.nrDifuzari > 0)
+        {
+            f.ore = new int[f.nrDifuzari];
+            for (int i = 0; i < f.nrDifuzari; i++)
+            {
+                cout << "Difuzarea numarul[" << i + 1 << "]: ";
+                cin >> f.ore[i];
+            }
+        }
+        else
+        {
+            f.nrDifuzari = 0;
+            f.ore = nullptr;
+        }
+        cout << endl;
+        return f;
+    }
+
+    static void CRUDMenuFilm() {
+        int choice;
+        vector<Film> vector;
+        do {
+            cout << "Alegeti o optiune: 1-> Create; 2-> Read ; 3-> Update; 4-> Delete ; 9-> EXIT" << endl;
+            cin >> choice;
+            switch (choice) {
+            case 1: {
+                cout << "Cate filme doriti sa creati?" << endl;
+                int number;
+                Film temp;
+                cout << "Optiune: ";
+                cin >> number;
+                for (int i = 0; i < number; i++) {
+                    cout << endl;
+                    temp = createFilm();
+                    cout << "Filmul cu numarul " << i + 1 << "a fost creat \n";
+                    vector.push_back(temp);
+                }
+                saveInFile(vector);
+                break;
+            }
+            case 2:
+                readFromFile();
+                break;
+            case 3: {
+                cout << "Introduceti ID-ul Filmului pe care doriti sa il actualizati: ";
+                int id;
+                cin >> id;
+                updateFilm(id, vector);
+                break;
+            }
+            case 4:
+                int id;
+                cout << "Introduceti ID-ul filmului pe care doriti sa il stergeti: ";
+                cin >> id;
+                deleteFromFile(id);
+
+            case 9:
+                break;
+
+            default:
+                cout << "Optiune invalida!" << endl;
+                break;
+            }
+
+        } while (choice != 9);
+
+    }
+
+    friend Film operator+(int, Film);
+    friend ostream& operator<<(ostream&, Film&);
+    friend istream& operator>>(istream&, Film&);
+    friend ofstream& operator << (ofstream&, Film&);
+    friend ifstream& operator>>(ifstream&, Film&);
+
+};
+int Film::idUnicf = 0;
+Film operator+(int nrAni, Film f)
+{
+    f.anulLansarii += nrAni;
+    return f;
+}
+
+ostream& operator<<(ostream& out, Film& f)
+{
+    out << "ID film : " << f.idUnicf << endl;
+    out << "Nume film: " << f.nume << endl;
+    out << "Genul filmului: " << f.gen << endl;
+    out << "Anul lansarii: " << f.anulLansarii << endl;
+    out << "Numar difuzari: " << f.nrDifuzari << endl;
+    out << "Filmul se va difuza la orele: ";
+    if (f.ore != nullptr)
+    {
+        for (int i = 0; i < f.nrDifuzari; i++)
+        {
+            out << f.ore[i] << ", ";
+        }
+    }
+    cout << endl;
+    out << endl;
+    return out;
+}
+
+istream& operator>>(istream& in, Film& f)
+{
+    cout << "Nume film: ";
+    delete[] f.nume;
+    char buffer[100];
+    in >> ws;
+    in.getline(buffer, 99);
+    f.nume = new char[strlen(buffer) + 1];
+    strcpy_s(f.nume, strlen(buffer) + 1, buffer);
+    cout << "Genul filmului: ";
+    in >> f.gen;
+    cout << "Anul lansarii: ";
+    in >> f.anulLansarii;
+    cout << "Numar difuzari ";
+    in >> f.nrDifuzari;
+    if (f.nrDifuzari > 0)
+    {
+        f.ore = new int[f.nrDifuzari];
+        for (int i = 0; i < f.nrDifuzari; i++)
+        {
+            cout << "Difuzarea numarul [" << i + 1 << "]: ";
+            in >> f.ore[i];
+        }
+    }
+    else
+    {
+        f.nrDifuzari = 0;
+        f.ore = nullptr;
+    }
+    cout << endl;
+    return in;
+}
+
+ofstream& operator<<(ofstream& out, Film& f)
+{
+    if (out.is_open())
+    {
+        out << f.nume << endl;
+        out << f.gen << endl;
+        out << f.anulLansarii << endl;
+        out << f.nrDifuzari << endl;
+        if (f.ore != nullptr)
+        {
+            for (int i = 0; i < f.nrDifuzari; i++)
+            {
+                out << f.ore[i] << " ";
+            }
+        }
+    }
+    return out;
+}
+
+ifstream& operator>>(ifstream& in, Film& f)
+{
+    cout << "Nume film: ";
+    delete[] f.nume;
+    char buffer[100];
+    in >> ws;
+    in.getline(buffer, 99);
+    f.nume = new char[strlen(buffer) + 1];
+    strcpy_s(f.nume, strlen(buffer) + 1, buffer);
+    cout << "Gen film: ";
+    in >> f.gen;
+    cout << "Anul lansarii: ";
+    in >> f.anulLansarii;
+    if (f.ore != nullptr)
+    {
+        delete[] f.ore;
+    }
+    cout << "Numar difuzari: ";
+    in >> f.nrDifuzari;
+    if (f.nrDifuzari > 0)
+    {
+        f.ore = new int[f.nrDifuzari];
+        for (int i = 0; i < f.nrDifuzari; i++)
+        {
+            cout << "Difuzarea numarul [" << i + 1 << "]: ";
+            in >> f.ore[i];
+        }
+    }
+    else
+    {
+        f.nrDifuzari = 0;
+        f.ore = nullptr;
+    }
+    cout << endl;
+    return in;
+}
