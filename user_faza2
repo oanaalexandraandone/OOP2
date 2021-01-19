@@ -1,0 +1,524 @@
+#pragma once
+#define USER_H
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class User
+{
+
+protected:
+    string nume = "Necunoscut";
+    enum  class Rol { client, admin };
+
+public:
+
+    bool deleteEntity() {
+        if (this != NULL) {
+            delete[] this;
+        }
+    }
+    virtual void afiseaza() = 0;
+
+    void setName(string n) {
+        if (sizeof(n) != 0) {
+            this->nume = n;
+        }
+        else {
+            cout << "Numele introdus este invalid!" << endl;
+        }
+    }
+
+    string getName() {
+        return this->nume;
+    }
+
+    friend ostream& operator>> (ostream& os, const Rol& obj)
+    {
+        os << static_cast<std::underlying_type<Rol>::type>(obj);
+        return os;
+    }
+};
+
+class Admin : public User {
+private:
+    User::Rol rol;
+    static int id1;
+    const int currentID = 0;
+
+public:
+    Admin() : currentID(++id1) {
+        rol = Rol::admin;
+        nume = "Anonim";
+    }
+
+    int getId() {
+        return this->currentID;
+    }
+
+    string getRol() {
+        Rol rol = this->rol;
+        string temp = "";
+        if (rol == Rol::client) {
+            temp = "client";
+        }
+        else
+            temp = "admin";
+        return temp;
+    }
+
+    string getName() {
+        return nume;
+    }
+
+    void afiseaza() override {
+        cout << "ID: " << getId() << endl;
+        cout << "Rol: " << getRol() << endl;
+        cout << "Nume: " << getName() << endl;
+    }
+};
+
+int Admin::id1 = 0;
+
+class Client : public User {
+protected:
+    string nrTel;
+    string email;
+    double venitDisponibil;
+    const int currentID;
+    Rol rol;
+    static int id;
+
+public:
+    Client() :currentID(id++) {
+        nume = "Anonim";
+        nrTel = " ";
+        email = " ";
+        venitDisponibil = 0;
+        rol = Rol::client;
+    }
+
+    Client(string name, string tel, string mail, double venit) :currentID(id++) {
+        rol = Rol::client;
+        this->nume = name;
+        this->nrTel = tel;
+        this->email = mail;
+        if (venit > 0) {
+            this->venitDisponibil = venit;
+        }
+        else {
+            this->venitDisponibil = 0;
+        }
+    }
+
+    Client(const Client& c) :currentID(c.currentID) {
+        this->nume = c.nume;
+        this->nrTel = c.nrTel;
+        this->email = c.email;
+        this->venitDisponibil = c.venitDisponibil;
+        this->rol = c.rol;
+    }
+
+    ~Client() {}
+
+    Client operator=(Client c) {
+        cout << "Operator =" << endl;
+        cout << "ID curent client: " << c.getCurrentID() << endl;
+        nume = c.nume;
+        nrTel = c.nrTel;
+        email = c.email;
+        venitDisponibil = c.venitDisponibil;
+        rol = c.rol;
+        return *this;
+    }
+
+    friend ifstream& operator >> (ifstream& in, Client& c) {
+        cout << "Nume:" << endl;
+        in >> c.nume;
+        cout << "Numar de telefon: " << endl;
+        in >> c.nrTel;
+        cout << "Email: " << endl;
+        in >> c.email;
+        cout << "Venit disponibil: " << endl;
+        in >> c.venitDisponibil;
+        return in;
+    }
+
+    friend ostream& operator << (ostream& out, Client& c) {
+        if (c.getCurrentID() != 0) {
+            cout << "ID: " << c.getCurrentID() << endl;
+            cout << "Rol: " << c.getRol() << endl;
+            cout << "Nume: " << c.getName() << endl;
+            cout << "Numar de telefon: " << c.nrTel << endl;
+            cout << "Email: " << c.getEmail() << endl;
+            cout << "Venit disponibil: " << c.getVenitDisponibil() << endl;
+        }
+        return out;
+    }
+
+    Client operator ++() {
+        venitDisponibil += 50;
+        return *this;
+    }
+
+    Client operator --() {
+
+        if (this->venitDisponibil > 10) {
+            this->venitDisponibil = venitDisponibil - 10;
+        }
+        return *this;
+    }
+
+    Client operator+(double c) {
+        Client copie = *this;
+        copie.venitDisponibil = venitDisponibil + c;
+        return copie;
+    }
+
+    operator double() {
+        return this->venitDisponibil;
+    }
+
+    bool operator> (Client& c) {
+        double venitCurrent = this->venitDisponibil;
+        double venitC = c.venitDisponibil;
+        return venitCurrent > venitC;
+    }
+
+    bool operator == (Client& c) {
+        return (this->currentID == c.currentID);
+    }
+
+    void afiseaza() override {
+        cout << "ID: " << this->getCurrentID() << endl;
+        cout << "Rol: " << this->getRol() << endl;
+        cout << "Nume: " << this->getName() << endl;
+        cout << "Numar de telefon: " << this->getNrTel() << endl;
+        cout << "Email: " << this->getEmail() << endl;
+        cout << "Venit disponibil: " << this->getVenitDisponibil() << endl;
+
+    }
+
+    void setNrTel(string tel) {
+        if (tel != " ") {
+            this->nrTel = tel;
+        }
+        else {
+            cout << "Numarul de telefon este invalid!" << endl;
+        }
+    }
+    int getCurrentID() {
+        return this->currentID;
+    }
+
+    string getNume()
+    {
+        return nume;
+    }
+
+    string getNrTel() {
+        return this->nrTel;
+    }
+    void setEmail(string mail) {
+        if (mail != " ") {
+            this->email = mail;
+        }
+        else {
+            cout << "Email invalid!" << endl;
+        }
+    }
+
+    string getEmail() {
+        return this->email;
+    }
+
+    void setVenitDisponibil(double venit) {
+        if (venit > 0) {
+            this->venitDisponibil = venit;
+        }
+        else {
+            cout << "Venitul nu poate fi negativ!" << endl;
+        }
+    }
+
+    double getVenitDisponibil() {
+        return this->venitDisponibil;
+    }
+
+    int getId() {
+        return this->currentID;
+    }
+
+    string getRol() {
+        Rol rol = this->rol;
+        string temp = "";
+        if (rol == Rol::client) {
+            temp = "client";
+        }
+        else
+            temp = "admin";
+        return temp;
+    }
+
+    Client updateClient() {
+        int choice = 0;
+        cout << "Ce atribut doriti sa actualizati?" << endl;
+        cout << "1 - Nume // 2 - Numar de telefon // 3 - Adresa de email // 4 - Venit disponibi // 9 - Inchide meniu" << endl;
+        cout << "Optiune: " << endl;
+
+        do {
+            cin >> choice;
+            switch (choice) {
+            case 1: {
+                string newName = " ";
+                cout << "Introduceti noul nume: ";
+                cin >> newName;
+                if (newName != "") {
+                    this->setName(newName);
+                }
+                this->afiseaza();
+            }break;
+            case 2: {
+                string newTel = " ";
+                cout << "Introduceti noul numar de telefon: ";
+                cin >> newTel;
+                this->setNrTel(newTel);
+                this->afiseaza();
+            }break;
+            case 3: {
+                string newMail = " ";
+                cout << "Introduceti noua adresa de mail: ";
+                cin >> newMail;
+                this->setEmail(newMail);
+                this->afiseaza();
+            }break;
+            case 4: {
+                double newVenit = 0;
+                cout << "Introduceti noul venit: ";
+                cin >> newVenit;
+                this->setVenitDisponibil(newVenit);
+                this->afiseaza();
+            }break;
+
+            case 9:
+                cout << "La revedere!" << endl;
+                break;
+
+            default:
+                cout << "Optiune invalida!" << endl;
+                break;
+            }
+        } while (choice != 9);
+        return *this;
+    }
+
+    static void updateClient(int id, vector<Client> vector) {
+        int choice = 0;
+        Client temp;
+        for (int i = 0; i < vector.size(); i++) {
+            if (vector[i].getCurrentID() == id)
+            {
+                temp = vector[i];
+                break;
+            }
+        }
+        cout << "Ce atribut doriti sa actualizati?" << endl;
+        cout << "1 - Nume // 2 - Numar de telefon // 3 - Adresa de email // 4 - Venit disponibi // 9 - Inchide" << endl;
+        do {
+            cout << "Optiune: ";
+            cin >> choice;
+            switch (choice) {
+            case 1: {
+                string newName = " ";
+                cout << "Introduceti noul nume: ";
+                cin >> newName;
+                if (newName != "") {
+                    temp.setName(newName);
+                }
+                temp.afiseaza();
+            }break;
+            case 2: {
+                string newTel = " ";
+                cout << "Introduceti noul numar de telefon: ";
+                cin >> newTel;
+                temp.setNrTel(newTel);
+                temp.afiseaza();
+            }break;
+            case 3: {
+                string newMail = " ";
+                cout << "Introduceti noua adresa de mail: ";
+                cin >> newMail;
+                temp.setEmail(newMail);
+                temp.afiseaza();
+            }break;
+            case 4: {
+                double newVenit = 0;
+                cout << "Introduceti noul venit: ";
+                cin >> newVenit;
+                temp.setVenitDisponibil(newVenit);
+                temp.afiseaza();
+            }break;
+
+            case 9:
+                cout << "La revedere!" << endl;
+                break;
+
+            default:
+                cout << "Optiune invalida!" << endl;
+                break;
+            }
+        } while (choice != 9);
+    }
+
+    //scriere un singur obiect
+    static void saveInFile(const Client& c, const char* fileName) {
+        fstream file;
+        file.open(fileName, ios::out | ios::binary);
+        if (!file) {
+            cout << "Error in creating file...\n";
+        }
+        file.write((char*)&c, sizeof(c));
+        file.close();
+    }
+
+    //scriere un sir de obiecte
+    static void saveInFile(vector<Client>& c) {
+        fstream file;
+        file.open("clienti.bin", ios::out | ios::binary);
+        if (!file) {
+            cout << "Eroare" << endl;
+        }
+        for (int i = 0; i < c.size(); i++) {
+            file.write((char*)&c[i], sizeof(Client));
+        }
+        file.close();
+        cout << "Date scrise cu succes" << endl;
+    }
+
+    //citire un singur obiect
+    static void readFromFile() {
+        Client temp;
+        vector<Client> vector;
+        ifstream ifs("clienti.bin", ios::binary);
+        if (!ifs) {
+            cout << "Error in creating file...\n";
+        }
+        while (ifs.read((char*)&temp, sizeof(temp))) {
+            vector.push_back(Client(temp));
+            cout << endl << endl;
+            cout << "Data extracted from file.. \n";
+            cout << temp;
+            temp.afiseaza();
+        }
+        ifs.close();
+    }
+
+    //citire un sir de obiecte
+    static void readFromFile(const char* fileName) {
+        ifstream b;
+        b.open(fileName);
+        Client client;
+        if (b.read((char*)&client, sizeof(client))) {
+            cout << endl << endl;
+            cout << "Date extrase!" << endl;
+            cout << client;
+        }
+        else {
+            cout << "Eroare" << endl;
+        }
+        b.close();
+    }
+
+    static void deleteFromFile(int id) {
+        cout << "Stergere..." << endl;
+        Client clientTemp;
+        vector<Client> vector;
+        ifstream ifs("clienti.bin", ios::out | ios::binary);
+        ofstream fout("temp.bin", ios::out | ios::binary);
+        if (!ifs) {
+            cout << "Eroare!" << endl;
+        }
+        while (ifs.read((char*)&clientTemp, sizeof(clientTemp))) {
+            vector.push_back(Client(clientTemp));
+            cout << endl << endl;
+            for (int i = 0; i < vector.size(); i++) {
+                if (vector[i].getCurrentID() != id) {
+                    fout.write((char*)&vector[i], sizeof(Client));
+                }
+            }
+        }
+        fout.close();
+        ifs.close();
+        remove("clienti.bin");
+        rename("temp.bin", "clienti.bin");
+    }
+
+    static Client createClient() {
+        Client c;
+        cout << "Nume:" << endl;
+        cin >> c.nume;
+        cout << "Numar de telefon: " << endl;
+        cin >> c.nrTel;
+        cout << "Email: " << endl;
+        cin >> c.email;
+        cout << "Venit disponibil: " << endl;
+        cin >> c.venitDisponibil;
+        return c;
+
+    }
+
+    static void CRUDMenuClient() {
+        int choice;
+        vector<Client> vector;
+        do {
+            cout << "Alegeti o optiune: 1-> Create; 2-> Read ; 3-> Update; 4-> Delete ; 9-> EXIT" << endl;
+            cin >> choice;
+            switch (choice) {
+            case 1: {
+                cout << "Cati clienti doriti sa creati?" << endl;
+                int number;
+                Client temp;
+                cout << "Optiune: ";
+                cin >> number;
+                for (int i = 0; i < number; i++) {
+                    cout << endl;
+                    temp = createClient();
+                    cout << "Clientul cu numarul " << i + 1 << "a fost creat!" << endl;
+                    vector.push_back(temp);
+                }
+                saveInFile(vector);
+                break;
+            }
+
+            case 2:
+                readFromFile();
+                break;
+            case 3: {
+
+                cout << "Introduceti ID-ul clientului pe care doriti sa il actualizati: ";
+                int id;
+                cin >> id;
+                updateClient(id, vector);
+                break;
+            }
+            case 4:
+                int id;
+                cout << "Introduceti ID-ul clientului pe care doriti sa il stergeti: ";
+                cin >> id;
+                deleteFromFile(id);
+            case 9:
+                break;
+            default:
+                cout << "Optiune invalida, ati inchis meniul!" << endl;
+                break;
+            }
+
+        } while (choice != 9);
+
+    }
+
+};
+
+int Client::id = 0;
